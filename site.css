@@ -160,3 +160,10 @@ body { background: var(--night); color: var(--foam); font: 400 17px/1.6 var(--te
   .inside, .booking, .reviews { padding: 72px 0; }
   .calc { padding: 22px; }
 }
+
+/* Фон секции: ИИ-текстура (Cloudflare Workers AI) под заливкой цвета сайта — декор, не фото бизнеса.
+   На компьютере картинка закреплена за окном — при прокрутке секция работает как окно (параллакс). */
+.reviews { background: linear-gradient(color-mix(in srgb, var(--night-2) 80%, transparent), color-mix(in srgb, var(--night-2) 92%, transparent)), url('img/bg-reviews.webp') center / cover var(--night-2); }
+@media (hover: hover) and (pointer: fine) {
+  .reviews { background-attachment: scroll, fixed; }
+}
