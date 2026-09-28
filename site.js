@@ -56,3 +56,34 @@
   date.addEventListener('change', update);
   update();
 })();
+
+// Рябь на «24/7»: движение мыши над первым экраном колышет воду в цифрах. В покое фильтр снят — ноль нагрузки.
+(function () {
+  'use strict';
+  var big = document.querySelector('.hero__big');
+  if (!big || !window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) return;
+  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('width', '0'); svg.setAttribute('height', '0'); svg.setAttribute('aria-hidden', 'true');
+  svg.style.position = 'absolute';
+  svg.innerHTML = '<filter id="ripple" x="-10%" y="-10%" width="120%" height="120%">' +
+    '<feTurbulence type="fractalNoise" baseFrequency=".01 .04" numOctaves="2" seed="4"/>' +
+    '<feDisplacementMap in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter>';
+  document.body.appendChild(svg);
+  var turb = svg.querySelector('feTurbulence'), disp = svg.querySelector('feDisplacementMap');
+  var power = 0, last = null, raf = 0, t = 0;
+
+  function frame() {
+    power *= 0.94; t += 0.03;
+    turb.setAttribute('baseFrequency', (0.01 + 0.003 * Math.sin(t)).toFixed(4) + ' ' + (0.04 + 0.01 * Math.cos(t * 0.7)).toFixed(4));
+    disp.setAttribute('scale', power.toFixed(1));
+    if (power > 0.3) raf = requestAnimationFrame(frame);
+    else { raf = 0; big.style.filter = ''; }
+  }
+  var hero = big.closest('.hero') || big;
+  hero.addEventListener('pointermove', function (e) {
+    if (last) power = Math.min(40, power + Math.hypot(e.clientX - last[0], e.clientY - last[1]) * 0.15);
+    last = [e.clientX, e.clientY];
+    if (!raf && power > 0.3) { big.style.filter = 'url(#ripple)'; raf = requestAnimationFrame(frame); }
+  });
+  hero.addEventListener('pointerleave', function () { last = null; });
+})();
